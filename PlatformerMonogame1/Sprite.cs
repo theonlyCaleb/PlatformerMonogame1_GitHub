@@ -9,12 +9,23 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace PlatformerMonogame1
 {
-    class Sprite
+    public class Sprite
     {
         public Vector2 position = Vector2.Zero;
         public Vector2 offset = Vector2.Zero;
+        public Vector2 velocity = Vector2.Zero;
 
         Texture2D texture;
+
+        public int width = 0;
+        public int height = 0;
+
+        //The edges of the Sprite, also edges of the hit box for collisions
+
+        public int leftEdge = 0;
+        public int rightEdge = 0;
+        public int topEdge = 0;
+        public int bottomEdge = 0;
 
         public Sprite()
         {
@@ -24,6 +35,17 @@ namespace PlatformerMonogame1
         public void Load (ContentManager content, string asset)
         {
             texture = content.Load<Texture2D>(asset);
+            width = texture.Bounds.Width;
+            height = texture.Bounds.Height;
+            UpdateHitBox();
+        }
+
+        public void UpdateHitBox()
+        {
+            leftEdge = (int)position.X;
+            rightEdge = (int)position.X + width;
+            topEdge = (int)position.Y;
+            bottomEdge = (int)position.Y + height;
         }
 
         public void Update (float deltaTime)
