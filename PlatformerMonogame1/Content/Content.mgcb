@@ -33,11 +33,6 @@
 /processorParam:TextureFormat=Color
 /build:hero.png
 
-#begin Castle.tmx
-/importer:TiledMapImporter
-/processor:TiledMapProcessor
-/build:Castle.tmx
-
 #begin Tileset (1).png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -49,4 +44,9 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Tileset (1).png
+
+#begin CastleLevel1.tmx
+/importer:TiledMapImporter
+/processor:TiledMapProcessor
+/build:CastleLevel1.tmx
 

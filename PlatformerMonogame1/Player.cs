@@ -17,6 +17,8 @@ namespace PlatformerMonogame1
         Game1 game = null;
         float runSpeed = 15000f;
 
+        Collision collision = new Collision();
+
         public Player()
         {
 
@@ -24,7 +26,9 @@ namespace PlatformerMonogame1
 
         public void Load (ContentManager content, Game1 theGame)
         {
-            playerSprite.Load(content, "hero");
+            playerSprite.Load(content, "hero", true);
+            playerSprite.offset = new Vector2(24, 24);
+
             game = theGame;
             playerSprite.velocity = Vector2.Zero;
             playerSprite.position = new Vector2(theGame.GraphicsDevice.Viewport.Width / 2, 0);
@@ -62,8 +66,13 @@ namespace PlatformerMonogame1
             {
                 localAcceleration.Y = runSpeed;
             }
+            
             playerSprite.velocity = localAcceleration * deltaTime;
             playerSprite.position += playerSprite.velocity * deltaTime;
+
+            collision.game = game;
+            playerSprite = collision.CollideWithPlatforms(playerSprite, deltaTime);
+
         }
     }
 }
