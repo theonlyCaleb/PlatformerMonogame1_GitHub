@@ -36,8 +36,8 @@ namespace PlatformerMonogame1
 
             playerPrediction.position += hero.velocity * deltaTime;
 
-            int playerColumn = (int)Math.Round(playerPrediction.position.X / game.tileHeight);
-            int playerRow = (int)Math.Round(playerPrediction.position.Y / game.tileHeight);
+            int playerColumn = (int)playerPrediction.position.X / game.tileHeight;
+            int playerRow = (int)playerPrediction.position.Y / game.tileHeight;
             Vector2 playerTile = new Vector2(playerColumn, playerRow);
 
             Vector2 leftTile = new Vector2(playerTile.X - 1, playerTile.Y);
