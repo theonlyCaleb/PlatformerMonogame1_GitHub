@@ -6,6 +6,8 @@ using MonoGame.Extended.Tiled;
 using MonoGame.Extended.Tiled.Graphics;
 using MonoGame.Extended.ViewportAdapters;
 using System.Collections;
+using Microsoft.Xna.Framework.Media;
+using System.Collections.Generic;
 
 namespace PlatformerMonogame1
 {
@@ -19,6 +21,9 @@ namespace PlatformerMonogame1
 
         Player player = new Player(); // Create an instance of our player class
 
+        List<Enemy> enemies = new List<Enemy>();
+        public Chest goal = null;
+
         Camera2D camera = null;
         TiledMap map = null;
         TiledMapRenderer mapRenderer = null;
@@ -31,6 +36,13 @@ namespace PlatformerMonogame1
         public int tileHeight = 0;
         public int levelTileWidth = 0;
         public int levelTileHeight = 0;
+
+        Song gameMusic;
+
+        SpriteFont arialFont;
+        int score = 0;
+        int lives = 3;
+        Texture2D heart = null; 
 
         public Game1()
         {
@@ -62,6 +74,9 @@ namespace PlatformerMonogame1
 
             player.Load(Content, this);
 
+            arialFont = Content.Load<SpriteFont>("arial");
+            heart = Content.Load<Texture2D>("Heart");
+
             BoxingViewportAdapter viewportAdapter = new BoxingViewportAdapter(Window, GraphicsDevice, graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height);
 
             camera = new Camera2D(viewportAdapter);
@@ -70,7 +85,11 @@ namespace PlatformerMonogame1
             map = Content.Load<TiledMap>("CastleLevel1");
             mapRenderer = new TiledMapRenderer(GraphicsDevice);
 
+            gameMusic = Content.Load<Song>("Superhero_original_no_Intro");
+            MediaPlayer.Play(gameMusic);
+
             SetUpTiles();
+            LoadObjects();
         }
 
         /// <summary>
@@ -79,7 +98,7 @@ namespace PlatformerMonogame1
         /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+            // TODO: Unload any non ContentManager content here 
         }
 
         /// <summary>
@@ -95,6 +114,11 @@ namespace PlatformerMonogame1
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             player.Update(deltaTime);
 
+            foreach (Enemy enemy in enemies)
+            {
+                enemy.Update(deltaTime);
+            }
+
             camera.Position = player.playerSprite.position - new Vector2(graphics.GraphicsDevice.Viewport.Width / 2, graphics.GraphicsDevice.Viewport.Height / 2);
 
             base.Update(gameTime);
@@ -106,7 +130,7 @@ namespace PlatformerMonogame1
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Aqua);
+            GraphicsDevice.Clear(Color.DarkSlateBlue);
 
             var viewMatrix = camera.GetViewMatrix();
             var projectionMatrix = Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 0f, -1f);
@@ -117,7 +141,26 @@ namespace PlatformerMonogame1
             mapRenderer.Draw(map, ref viewMatrix, ref projectionMatrix);
             // Call the "Draw" function from our player class
             player.Draw(spriteBatch);
+
+            foreach (Enemy enemy in enemies)
+            {
+                enemy.Draw(spriteBatch);
+            }
+
+            goal.Draw(spriteBatch);
             // Finish drawing
+            spriteBatch.End();
+
+            spriteBatch.Begin();
+            spriteBatch.DrawString(arialFont, "SCORE: " + score.ToString(), new Vector2(20, 20), Color.White);
+
+            int loopCount = 0;
+            while (loopCount < lives)
+            {
+                spriteBatch.Draw(heart, new Vector2(GraphicsDevice.Viewport.Width - 60 - loopCount * 40, 20), Color.White); // Heart location
+                loopCount++;
+            }
+
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -165,6 +208,36 @@ namespace PlatformerMonogame1
                 }
 
                 loopCount++;
+            }
+        }
+
+        void LoadObjects()
+        {
+            foreach (TiledMapObjectLayer layer in map.ObjectLayers)
+            {
+                if (layer.Name == "Enemies")
+                {
+                    foreach (TiledMapObject thing in layer.Objects)
+                    {
+                        Enemy enemy = new Enemy();
+                        Vector2 tiles = new Vector2((int)(thing.Position.X / tileHeight), (int)(thing.Position.Y / tileHeight));
+                        enemy.enemySprite.position = tiles * tileHeight;
+                        enemy.Load(Content, this);
+                        enemies.Add(enemy);
+                    }
+                }
+
+                if (layer.Name == "Goal")
+                {
+                    TiledMapObject thing = layer.Objects[0];
+                    if (thing != null)
+                    {
+                        Chest chest = new Chest();
+                        chest.chestSprite.position = new Vector2(thing.Position.X, thing.Position.Y);
+                        chest.Load(Content, this);
+                        goal = chest; 
+                    }
+                }
             }
         }
     }
