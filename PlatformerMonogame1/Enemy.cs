@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 
 namespace PlatformerMonogame1
 {
-    class Enemy
+    public class Enemy
     {
         float walkSpeed = 7500f;
         public Sprite enemySprite = new Sprite();

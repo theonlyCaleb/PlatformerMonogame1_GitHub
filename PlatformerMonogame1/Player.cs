@@ -11,16 +11,16 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace PlatformerMonogame1
 {
-    class Player
+    public class Player
     {
         public Sprite playerSprite = new Sprite();
 
         Game1 game = null;
         float runSpeed = 250f;
-        float maxRunSpeed = 500f;
-        float friction = -500f;
+        float maxRunSpeed = 400f;
+        float friction = 1000f;
         float terminalVelocity = 500f;
-        public float jumpStrength = 50000;
+        public float jumpStrength = 30000f;
 
         Collision collision = new Collision();
 
@@ -54,6 +54,16 @@ namespace PlatformerMonogame1
             UpdateInput(deltaTime);
             playerSprite.Update(deltaTime);
             playerSprite.UpdateHitBox();
+
+            if (collision.IsColliding(playerSprite, game.goal.chestSprite))
+            {
+                game.Exit();
+            }
+
+            for (int i = 0; i < game.enemies.Count; i++)
+            {
+                playerSprite = collision.CollideWithMonster(this, game.enemies[i], deltaTime, game);
+            }
         }
 
         public void Draw (SpriteBatch spriteBatch)
@@ -66,7 +76,7 @@ namespace PlatformerMonogame1
             bool wasMovingLeft = playerSprite.velocity.X < 0;
             bool wasMovingRight = playerSprite.velocity.X > 0;
 
-            Vector2 localAcceleration = new Vector2(0, 0);
+            Vector2 localAcceleration = game.gravity;
 
             if (Keyboard.GetState().IsKeyDown(Keys.Left) == true)
             {
@@ -91,22 +101,15 @@ namespace PlatformerMonogame1
                 playerSprite.Stop();
             }
 
-            /*if (Keyboard.GetState().IsKeyDown(Keys.Up) == true)
-            {
-                localAcceleration.Y = -runSpeed;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Down) == true)
-            {
-                localAcceleration.Y = runSpeed;
-            }*/
-
             if (Keyboard.GetState().IsKeyUp(Keys.Left) == true && Keyboard.GetState().IsKeyUp(Keys.Right) == true)
             {
                 playerSprite.Stop();
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Space) == true)
+            if (Keyboard.GetState().IsKeyDown(Keys.Space) && playerSprite.canJump == true)
             {
+                playerSprite.canJump = false;
+                localAcceleration.Y -= jumpStrength;
                 jumpSoundtInstance.Play();
             }
             
@@ -119,6 +122,11 @@ namespace PlatformerMonogame1
             else if (playerSprite.velocity.X < -maxRunSpeed)
             {
                 playerSprite.velocity.X = -maxRunSpeed;
+            }
+
+            if (playerSprite.velocity.Y > terminalVelocity)
+            {
+                playerSprite.velocity.Y = terminalVelocity;
             }
 
             playerSprite.position += playerSprite.velocity * deltaTime;
