@@ -121,6 +121,8 @@ namespace PlatformerMonogame1
                 enemy.Update(deltaTime);
             }
 
+            goal.Update(deltaTime);
+
             camera.Position = player.playerSprite.position - new Vector2(graphics.GraphicsDevice.Viewport.Width / 2, graphics.GraphicsDevice.Viewport.Height / 2);
 
             base.Update(gameTime);

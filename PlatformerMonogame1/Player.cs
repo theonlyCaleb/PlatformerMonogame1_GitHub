@@ -124,6 +124,12 @@ namespace PlatformerMonogame1
                 playerSprite.velocity.X = -maxRunSpeed;
             }
 
+            if (wasMovingLeft && (playerSprite.velocity.X > 0) || wasMovingRight && (playerSprite.velocity.X < 0))
+            {
+                // Clamp the velocity at 0 to prevent slide
+                playerSprite.velocity.X = 0; 
+            }
+
             if (playerSprite.velocity.Y > terminalVelocity)
             {
                 playerSprite.velocity.Y = terminalVelocity;
