@@ -19,6 +19,8 @@ namespace PlatformerMonogame1
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        public bool debug = false;
+
         Player player = new Player(); // Create an instance of our player class
 
         public List<Enemy> enemies = new List<Enemy>();
@@ -44,7 +46,19 @@ namespace PlatformerMonogame1
         SpriteFont arialFont;
         int score = 0;
         int lives = 3;
-        Texture2D heart = null; 
+        Texture2D heart = null;
+
+        public Texture2D rect; 
+
+        public void DrawRectangle (Rectangle coords, Color color)
+        {
+            if (rect == null)
+            {
+                rect = new Texture2D(GraphicsDevice, 1, 1);
+                rect.SetData(new[] { Color.White });
+            }
+            spriteBatch.Draw(rect, coords, color);
+        }
 
         public Game1()
         {
@@ -113,7 +127,16 @@ namespace PlatformerMonogame1
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (Keyboard.GetState().IsKeyDown(Keys.F1))
+            {
+                debug = true;
+            }
+            else if (Keyboard.GetState().IsKeyUp(Keys.F1))
+            {
+                debug = false;
+            }
+
+                float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             player.Update(deltaTime);
 
             foreach (Enemy enemy in enemies)
@@ -156,6 +179,12 @@ namespace PlatformerMonogame1
 
             spriteBatch.Begin();
             spriteBatch.DrawString(arialFont, "SCORE: " + score.ToString(), new Vector2(20, 20), Color.White);
+       
+
+            if (debug == true)
+            {
+                 spriteBatch.DrawString(arialFont, "Debug = " + debug.ToString(), new Vector2(20, 40), Color.White);
+            }
 
             int loopCount = 0;
             while (loopCount < lives)

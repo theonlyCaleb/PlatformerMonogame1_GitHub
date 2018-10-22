@@ -16,11 +16,15 @@ namespace PlatformerMonogame1
         public Sprite playerSprite = new Sprite();
 
         Game1 game = null;
-        float runSpeed = 250f;
+        float runSpeed = 400f;
         float maxRunSpeed = 400f;
-        float friction = 1000f;
+        float friction = 3000f;
         float terminalVelocity = 500f;
-        public float jumpStrength = 30000f;
+        public float jumpStrength = 35000f;
+
+        int leftColOffset = 10;
+        int rightColOffset = 10;
+        int topColOffset = 10;
 
         Collision collision = new Collision();
 
@@ -34,6 +38,11 @@ namespace PlatformerMonogame1
 
         public void Load (ContentManager content, Game1 theGame)
         {
+            playerSprite.leftCollisionOffset = leftColOffset;
+            playerSprite.rightCollisionOffset = rightColOffset;
+            playerSprite.vertCollisionOffset = topColOffset;
+           
+
             playerSprite.Load(content, "hero", true);
            
             AnimatedTexture animation = new AnimatedTexture(playerSprite.offset, 0, 1, 1);
@@ -68,7 +77,7 @@ namespace PlatformerMonogame1
 
         public void Draw (SpriteBatch spriteBatch)
         {
-            playerSprite.Draw(spriteBatch);
+            playerSprite.Draw(spriteBatch, game);
         }
 
         private void UpdateInput (float deltaTime)

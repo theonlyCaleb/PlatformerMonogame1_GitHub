@@ -27,7 +27,7 @@ namespace PlatformerMonogame1
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            chestSprite.Draw(spriteBatch);
+            chestSprite.Draw(spriteBatch, game);
         }
 
         public void Update(float deltaTime)

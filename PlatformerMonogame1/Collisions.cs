@@ -15,7 +15,10 @@ namespace PlatformerMonogame1
         {
             // Compare the position of each rectangle edge against the other
             // It compares opposite edges of each rectangle 
-            if (hero.rightEdge < otherSprite.leftEdge || hero.leftEdge > otherSprite.rightEdge || hero.bottomEdge < otherSprite.topEdge || hero.topEdge > otherSprite.bottomEdge)
+            if (hero.rightEdge < otherSprite.leftEdge || 
+                hero.leftEdge > otherSprite.rightEdge || 
+                hero.bottomEdge < otherSprite.topEdge || 
+                hero.topEdge > otherSprite.bottomEdge)
             {
                 return false; // These rectangles are NOT colliding
             }
@@ -23,17 +26,29 @@ namespace PlatformerMonogame1
             return true; // These rectangles ARE overlapping and there is a collision
         }
 
-        public Sprite CollideWithPlatforms(Sprite hero, float deltaTime)
+        public Sprite PlayerPrediction (Sprite hero, float deltaTime)
         {
-            // Create a copy of the hero that will move to where the hero will be on the next frame,
-            // to predict if the hero will overlap an obstacle
             Sprite playerPrediction = new Sprite();
             playerPrediction.position = hero.position;
             playerPrediction.width = hero.width;
             playerPrediction.height = hero.height;
             playerPrediction.offset = hero.offset;
+
+            playerPrediction.leftCollisionOffset = hero.leftCollisionOffset;
+            playerPrediction.rightCollisionOffset = hero.rightCollisionOffset;
+            playerPrediction.vertCollisionOffset = hero.vertCollisionOffset;
+            
             playerPrediction.UpdateHitBox();
 
+            return playerPrediction;
+        }
+
+        public Sprite CollideWithPlatforms(Sprite hero, float deltaTime)
+        {
+            // Create a copy of the hero that will move to where the hero will be on the next frame,
+            // to predict if the hero will overlap an obstacle
+            Sprite playerPrediction = PlayerPrediction(hero, deltaTime);
+ 
             playerPrediction.position += hero.velocity * deltaTime;
 
             int playerColumn = (int)playerPrediction.position.X / game.tileHeight;
@@ -128,7 +143,7 @@ namespace PlatformerMonogame1
 
             if (IsColliding(playerPrediction, tile) == true && hero.velocity.X < 0)
             {
-                hero.position.X = tile.rightEdge + hero.offset.X;
+                hero.position.X = tile.rightEdge + hero.offset.X - hero.leftCollisionOffset;
                 hero.velocity.X = 0;
             }
 
@@ -141,7 +156,7 @@ namespace PlatformerMonogame1
 
             if (IsColliding(playerPrediction, tile) == true && hero.velocity.X > 0)
             {
-                hero.position.X = tile.leftEdge - hero.width + hero.offset.X;
+                hero.position.X = tile.leftEdge - hero.width + hero.offset.X + hero.rightCollisionOffset / 2;
                 hero.velocity.X = 0;
             }
 
@@ -154,7 +169,7 @@ namespace PlatformerMonogame1
 
             if (IsColliding(playerPrediction, tile) == true && hero.velocity.Y < 0)
             {
-                hero.position.Y = tile.bottomEdge + hero.offset.Y;
+                hero.position.Y = tile.bottomEdge + hero.offset.Y - hero.vertCollisionOffset;
                 hero.velocity.Y = 0;
             }
 
@@ -196,12 +211,12 @@ namespace PlatformerMonogame1
                 else if (rightEdgeDistance < leftEdgeDistance)
                 {
                     // If right edge is closest, collision is happening to the right of the platform
-                    hero.position.X = tile.rightEdge + hero.offset.X;
+                    hero.position.X = tile.rightEdge + hero.offset.X - hero.leftCollisionOffset;
                 }
                 else
                 {
                     // If left edge is closest, collision is happening to the left of the platform
-                    hero.position.X = tile.leftEdge - hero.width + hero.offset.X;
+                    hero.position.X = tile.leftEdge - hero.width + hero.offset.X + hero.rightCollisionOffset / 2;
                 }  
             }
             return hero;         
@@ -220,17 +235,17 @@ namespace PlatformerMonogame1
                 if (bottomEdgeDistance < leftEdgeDistance && bottomEdgeDistance < rightEdgeDistance)
                 {
                     // If the bottom edge is closest and overlapping on the top edge 
-                    hero.position.Y = tile.bottomEdge + hero.offset.Y;
+                    hero.position.Y = tile.bottomEdge + hero.offset.Y - hero.vertCollisionOffset;
                 }
                 else if (leftEdgeDistance < rightEdgeDistance)
                 {
                     // Else if left edge is closest and overlapping 
-                    hero.position.X = tile.rightEdge + hero.offset.X;
+                    hero.position.X = tile.rightEdge + hero.offset.X - hero.leftCollisionOffset;
                 }
                 else
                 {
                     // Else if right edge is closest and overlapping 
-                    hero.position.X = tile.leftEdge - hero.width + hero.offset.X;  
+                    hero.position.X = tile.leftEdge - hero.width + hero.offset.X + hero.rightCollisionOffset / 2;
                 }
             }
             return hero;
@@ -238,12 +253,7 @@ namespace PlatformerMonogame1
 
         public Sprite CollideWithMonster (Player hero, Enemy monster, float deltaTime, Game1 theGame)
         {
-            Sprite playerPrediction = new Sprite();
-            playerPrediction.position = hero.playerSprite.position;
-            playerPrediction.width = hero.playerSprite.width;
-            playerPrediction.height = hero.playerSprite.height;
-            playerPrediction.offset = hero.playerSprite.offset;
-            playerPrediction.UpdateHitBox();
+            Sprite playerPrediction = PlayerPrediction(hero.playerSprite, deltaTime);            
 
             playerPrediction.position += hero.playerSprite.velocity * deltaTime;
             

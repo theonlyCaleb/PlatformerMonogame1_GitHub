@@ -29,10 +29,16 @@ namespace PlatformerMonogame1
         public int topEdge = 0;
         public int bottomEdge = 0;
 
+        // The distance we need to offset to create a snug collision
+        public int leftCollisionOffset = 0;
+        public int rightCollisionOffset = 0;
+        public int vertCollisionOffset = 0;
+
         List<AnimatedTexture> animations = new List<AnimatedTexture>();
         List<Vector2> animationOffsets = new List<Vector2>();
         int currentAnimation = 0;
         SpriteEffects effects = SpriteEffects.None;
+
 
         public Sprite()
         {
@@ -55,10 +61,10 @@ namespace PlatformerMonogame1
 
         public void UpdateHitBox()
         {
-            leftEdge = (int)position.X - (int)offset.X;
-            rightEdge = leftEdge + width;
-            topEdge = (int)position.Y - (int)offset.Y;
-            bottomEdge = topEdge + height;
+            leftEdge = (int)position.X - (int)offset.X + leftCollisionOffset;
+            rightEdge = leftEdge + width - rightCollisionOffset;
+            topEdge = (int)position.Y - (int)offset.Y + vertCollisionOffset;
+            bottomEdge = topEdge + height - vertCollisionOffset;
         }
 
         public void Update (float deltaTime)
@@ -66,9 +72,14 @@ namespace PlatformerMonogame1
             animations[currentAnimation].UpdateFrame(deltaTime);
         }
 
-        public void Draw (SpriteBatch spriteBatch)
+        public void Draw (SpriteBatch spriteBatch, Game1 game)
         {
             animations[currentAnimation].DrawFrame(spriteBatch, position + animationOffsets[currentAnimation], effects);
+
+            if (game.debug == true)
+            {
+                 game.DrawRectangle(new Rectangle(leftEdge, topEdge, width - rightCollisionOffset, height - vertCollisionOffset), Color.White);
+            }                     
         }
 
         public void AddAnimation (AnimatedTexture animation, int xOffset = 0, int yOffset = 0)

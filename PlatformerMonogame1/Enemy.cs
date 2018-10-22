@@ -16,17 +16,25 @@ namespace PlatformerMonogame1
         Collision collision = new Collision();
         Game1 game = null;
 
+        int horColOffset = 32;
+        int vertColOffset = 32;
+
+        int frameCount = 4;
+
         public void Load(ContentManager content, Game1 game)
         {
             this.game = game;
 
-            AnimatedTexture animation = new AnimatedTexture(Vector2.Zero, 0, 1, 1);
-            animation.Load(content, "zombie", 4, 5);
+            enemySprite.Load(content, "zombie", false);
+            enemySprite.width = enemySprite.width / frameCount;
 
-            enemySprite.AddAnimation(animation, 16, 0);
-            enemySprite.width = 64;
-            enemySprite.height = 64;
-            enemySprite.offset = new Vector2(8, 8);
+            AnimatedTexture animation = new AnimatedTexture(Vector2.Zero, 0, 1, 1);
+            animation.Load(content, "zombie", frameCount, 5);
+
+            enemySprite.AddAnimation(animation, 0, 0);
+            //enemySprite.width = 64 - horColOffset;
+            //enemySprite.height = 64 - vertColOffset;
+            enemySprite.offset = new Vector2(2, 2);
         }
 
         public void Update(float deltaTime)
@@ -50,7 +58,7 @@ namespace PlatformerMonogame1
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            enemySprite.Draw(spriteBatch);
+            enemySprite.Draw(spriteBatch, game);
         }
     }   
 }
