@@ -20,7 +20,7 @@ namespace PlatformerMonogame1
         float maxRunSpeed = 400f;
         float friction = 3000f;
         float terminalVelocity = 500f;
-        public float jumpStrength = 35000f;
+        public float jumpStrength = 60000f;
 
         int leftColOffset = 10;
         int rightColOffset = 10;
@@ -55,7 +55,8 @@ namespace PlatformerMonogame1
 
             game = theGame;
             playerSprite.velocity = Vector2.Zero;
-            playerSprite.position = new Vector2(theGame.GraphicsDevice.Viewport.Width / 2, 0);
+            //playerSprite.position = new Vector2(theGame.GraphicsDevice.Viewport.Width / 2, 0);
+            playerSprite.position = theGame.currentCheckpoint.position;
         }
 
         public void Update (float deltaTime)
@@ -73,6 +74,12 @@ namespace PlatformerMonogame1
             {
                 playerSprite = collision.CollideWithMonster(this, game.enemies[i], deltaTime, game);
             }
+
+            for (int i = 0; i < game.hazards.Count; i++)
+            {
+                playerSprite = collision.CollideWithHazards(this, game.hazards[i], deltaTime, game);
+            }
+
         }
 
         public void Draw (SpriteBatch spriteBatch)
@@ -149,6 +156,18 @@ namespace PlatformerMonogame1
             collision.game = game;
             playerSprite = collision.CollideWithPlatforms(playerSprite, deltaTime);
 
+        }
+
+        public void KillPlayer()
+        {
+            playerSprite.position = game.currentCheckpoint.position;
+
+            game.lives -= 1;
+
+            if (game.lives < 1)
+            {
+                game.Exit();
+            }
         }
     }
 }

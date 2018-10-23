@@ -276,8 +276,26 @@ namespace PlatformerMonogame1
                 else
                 {
                     // Kill player
-                    theGame.Exit();
+                    hero.KillPlayer();
                 }
+            }
+            return hero.playerSprite;
+        }
+
+        public Sprite CollideWithHazards (Player hero, Hazards spike, float deltaTime, Game1 theGame)
+        {
+            Sprite playerPrediction = new Sprite();
+            playerPrediction.position = hero.playerSprite.position;
+            playerPrediction.width = hero.playerSprite.width;
+            playerPrediction.height = hero.playerSprite.height;
+            playerPrediction.offset = hero.playerSprite.offset;
+            playerPrediction.UpdateHitBox();
+
+            playerPrediction.position += hero.playerSprite.velocity * deltaTime;
+
+            if (IsColliding(playerPrediction, spike.hazardsSprite))
+            {
+                hero.KillPlayer();
             }
             return hero.playerSprite;
         }

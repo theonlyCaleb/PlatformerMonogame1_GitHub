@@ -24,15 +24,16 @@ namespace PlatformerMonogame1
         Player player = new Player(); // Create an instance of our player class
 
         public List<Enemy> enemies = new List<Enemy>();
+        public List<Hazards> hazards = new List<Hazards>();
         public Chest goal = null;
+        public Sprite currentCheckpoint = null;
 
         Camera2D camera = null;
         TiledMap map = null;
         TiledMapRenderer mapRenderer = null;
         TiledMapTileLayer collisionLayer;
-        TiledMapLayer hazardLayer;
-        TiledMapLayer climbableLayer;
         public ArrayList allCollisionTiles = new ArrayList();
+        public ArrayList allHazardTiles = new ArrayList();
         public Sprite[,] levelGrid;
 
         public int tileHeight = 0;
@@ -45,7 +46,7 @@ namespace PlatformerMonogame1
 
         SpriteFont arialFont;
         int score = 0;
-        int lives = 3;
+        public int lives = 3;
         Texture2D heart = null;
 
         public Texture2D rect; 
@@ -88,6 +89,12 @@ namespace PlatformerMonogame1
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            map = Content.Load<TiledMap>("CastleLevel1");
+            mapRenderer = new TiledMapRenderer(GraphicsDevice);
+
+            SetUpTiles();
+            LoadObjects();
+
             player.Load(Content, this);
 
             arialFont = Content.Load<SpriteFont>("arial");
@@ -98,14 +105,10 @@ namespace PlatformerMonogame1
             camera = new Camera2D(viewportAdapter);
             camera.Position = new Vector2(0, graphics.GraphicsDevice.Viewport.Height);
 
-            map = Content.Load<TiledMap>("CastleLevel1");
-            mapRenderer = new TiledMapRenderer(GraphicsDevice);
+         
 
             gameMusic = Content.Load<Song>("Superhero_original_no_Intro");
-            MediaPlayer.Play(gameMusic);
-
-            SetUpTiles();
-            LoadObjects();
+            MediaPlayer.Play(gameMusic);        
         }
 
         /// <summary>
@@ -157,7 +160,7 @@ namespace PlatformerMonogame1
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.DarkSlateBlue);
+            GraphicsDevice.Clear(Color.TransparentBlack);
 
             var viewMatrix = camera.GetViewMatrix();
             var projectionMatrix = Matrix.CreateOrthographicOffCenter(0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 0, 0f, -1f);
@@ -217,7 +220,7 @@ namespace PlatformerMonogame1
             int rows = 0;
             int loopCount = 0;
 
-            while(loopCount < collisionLayer.Tiles.Count)
+            while (loopCount < collisionLayer.Tiles.Count)
             {
                 if (collisionLayer.Tiles[loopCount].GlobalIdentifier != 0)
                 {
@@ -247,6 +250,17 @@ namespace PlatformerMonogame1
         {
             foreach (TiledMapObjectLayer layer in map.ObjectLayers)
             {
+                if (layer.Name == "Respawn")
+                {
+                    TiledMapObject thing = layer.Objects[0];
+                    if (thing != null)
+                    {
+                        Sprite respawn = new Sprite();
+                        respawn.position = new Vector2(thing.Position.X, thing.Position.Y);
+                        currentCheckpoint = respawn;
+                    } 
+                }
+
                 if (layer.Name == "Enemies")
                 {
                     foreach (TiledMapObject thing in layer.Objects)
