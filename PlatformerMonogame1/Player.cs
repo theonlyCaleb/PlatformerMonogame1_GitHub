@@ -16,11 +16,12 @@ namespace PlatformerMonogame1
         public Sprite playerSprite = new Sprite();
 
         Game1 game = null;
+        Key key = null;
         float runSpeed = 400f;
         float maxRunSpeed = 400f;
         float friction = 3000f;
         float terminalVelocity = 500f;
-        public float jumpStrength = 60000f;
+        public float jumpStrength = 38000f;
 
         int leftColOffset = 10;
         int rightColOffset = 10;
@@ -29,7 +30,11 @@ namespace PlatformerMonogame1
         Collision collision = new Collision();
 
         SoundEffect jumpSound;
-        SoundEffectInstance jumpSoundtInstance;
+        SoundEffectInstance jumpSoundInstance;
+        SoundEffect deathSound;
+        SoundEffectInstance deathSoundInstance;
+        SoundEffect collectSound;
+        SoundEffectInstance collectSoundInstance;
 
         public Player()
         {
@@ -50,24 +55,44 @@ namespace PlatformerMonogame1
             playerSprite.AddAnimation(animation, 0, -5);
             playerSprite.Stop();
 
-            jumpSound = content.Load<SoundEffect>("Jump");
-            jumpSoundtInstance = jumpSound.CreateInstance();
+            jumpSound = content.Load<SoundEffect>("Player Jump (edited)");
+            jumpSoundInstance = jumpSound.CreateInstance();
+
+            deathSound = content.Load<SoundEffect>("Player Death (edited)");
+            deathSoundInstance = deathSound.CreateInstance();
+
+            collectSound = content.Load<SoundEffect>("Key Collect (edited)");
+            collectSoundInstance = collectSound.CreateInstance();
 
             game = theGame;
             playerSprite.velocity = Vector2.Zero;
-            //playerSprite.position = new Vector2(theGame.GraphicsDevice.Viewport.Width / 2, 0);
+            playerSprite.position = new Vector2(theGame.GraphicsDevice.Viewport.Width / 2, 0);
             playerSprite.position = theGame.currentCheckpoint.position;
         }
 
-        public void Update (float deltaTime)
+        public void Update(float deltaTime)
         {
             UpdateInput(deltaTime);
             playerSprite.Update(deltaTime);
             playerSprite.UpdateHitBox();
 
+            if (collision.IsColliding(playerSprite, game.unlock.keySprite))
+            {
+                collectSoundInstance.Play();
+                game.chestUnlocked = true;
+
+            }
+
             if (collision.IsColliding(playerSprite, game.goal.chestSprite))
             {
-                game.Exit();
+                if (game.chestUnlocked == true)
+                {
+                    game.Exit();
+                }
+                else
+                {
+                    game.chestUnlocked = false;
+                }
             }
 
             for (int i = 0; i < game.enemies.Count; i++)
@@ -79,7 +104,6 @@ namespace PlatformerMonogame1
             {
                 playerSprite = collision.CollideWithHazards(this, game.hazards[i], deltaTime, game);
             }
-
         }
 
         public void Draw (SpriteBatch spriteBatch)
@@ -126,7 +150,7 @@ namespace PlatformerMonogame1
             {
                 playerSprite.canJump = false;
                 localAcceleration.Y -= jumpStrength;
-                jumpSoundtInstance.Play();
+                jumpSoundInstance.Play();
             }
             
             playerSprite.velocity += localAcceleration * deltaTime;
@@ -163,9 +187,10 @@ namespace PlatformerMonogame1
             playerSprite.position = game.currentCheckpoint.position;
 
             game.lives -= 1;
+            deathSoundInstance.Play();
 
             if (game.lives < 1)
-            {
+            {              
                 game.Exit();
             }
         }

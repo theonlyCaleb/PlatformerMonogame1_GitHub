@@ -4,6 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
 
 namespace PlatformerMonogame1
 {
@@ -253,6 +257,8 @@ namespace PlatformerMonogame1
 
         public Sprite CollideWithMonster (Player hero, Enemy monster, float deltaTime, Game1 theGame)
         {
+            
+
             Sprite playerPrediction = PlayerPrediction(hero.playerSprite, deltaTime);            
 
             playerPrediction.position += hero.playerSprite.velocity * deltaTime;
@@ -282,18 +288,13 @@ namespace PlatformerMonogame1
             return hero.playerSprite;
         }
 
-        public Sprite CollideWithHazards (Player hero, Hazards spike, float deltaTime, Game1 theGame)
+        public Sprite CollideWithHazards (Player hero, Hazards hazards, float deltaTime, Game1 theGame)
         {
-            Sprite playerPrediction = new Sprite();
-            playerPrediction.position = hero.playerSprite.position;
-            playerPrediction.width = hero.playerSprite.width;
-            playerPrediction.height = hero.playerSprite.height;
-            playerPrediction.offset = hero.playerSprite.offset;
-            playerPrediction.UpdateHitBox();
+            Sprite playerPrediction = PlayerPrediction(hero.playerSprite, deltaTime);
 
             playerPrediction.position += hero.playerSprite.velocity * deltaTime;
 
-            if (IsColliding(playerPrediction, spike.hazardsSprite))
+            if (IsColliding(playerPrediction, hazards.hazardsSprite))
             {
                 hero.KillPlayer();
             }

@@ -7,6 +7,7 @@ using MonoGame.Extended.Tiled.Graphics;
 using MonoGame.Extended.ViewportAdapters;
 using System.Collections;
 using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 
 namespace PlatformerMonogame1
@@ -24,8 +25,10 @@ namespace PlatformerMonogame1
         Player player = new Player(); // Create an instance of our player class
 
         public List<Enemy> enemies = new List<Enemy>();
-        public List<Hazards> hazards = new List<Hazards>();
         public Chest goal = null;
+        public List<Hazards> hazards = new List<Hazards>();
+        public Key unlock = null;
+        public bool chestUnlocked = false;
         public Sprite currentCheckpoint = null;
 
         Camera2D camera = null;
@@ -33,7 +36,7 @@ namespace PlatformerMonogame1
         TiledMapRenderer mapRenderer = null;
         TiledMapTileLayer collisionLayer;
         public ArrayList allCollisionTiles = new ArrayList();
-        public ArrayList allHazardTiles = new ArrayList();
+        public ArrayList keyTile = new ArrayList();
         public Sprite[,] levelGrid;
 
         public int tileHeight = 0;
@@ -105,9 +108,8 @@ namespace PlatformerMonogame1
             camera = new Camera2D(viewportAdapter);
             camera.Position = new Vector2(0, graphics.GraphicsDevice.Viewport.Height);
 
-         
-
-            gameMusic = Content.Load<Song>("Superhero_original_no_Intro");
+        
+            gameMusic = Content.Load<Song>("Foreboding");
             MediaPlayer.Play(gameMusic);        
         }
 
@@ -147,7 +149,14 @@ namespace PlatformerMonogame1
                 enemy.Update(deltaTime);
             }
 
+            foreach (Hazards hazard in hazards)
+            {
+                hazard.Update(deltaTime);
+            }
+
+            unlock.Update(deltaTime);
             goal.Update(deltaTime);
+     
 
             camera.Position = player.playerSprite.position - new Vector2(graphics.GraphicsDevice.Viewport.Width / 2, graphics.GraphicsDevice.Viewport.Height / 2);
 
@@ -172,10 +181,11 @@ namespace PlatformerMonogame1
             // Call the "Draw" function from our player class
             player.Draw(spriteBatch);
             goal.Draw(spriteBatch);
+            unlock.Draw(spriteBatch);
             foreach (Enemy enemy in enemies)
             {
                 enemy.Draw(spriteBatch);
-            }
+            }        
 
             // Finish drawing
             spriteBatch.End();
@@ -273,6 +283,19 @@ namespace PlatformerMonogame1
                     }
                 }
 
+                if (layer.Name == "Key")
+                {
+                    TiledMapObject thing = layer.Objects[0];
+                    if (thing != null)
+                    {
+                        Key key = new Key();
+                        key.keySprite.position = new Vector2(thing.Position.X, thing.Position.Y);
+                        key.Load(Content, this);
+                        unlock = key;
+                        
+                    }
+                }
+
                 if (layer.Name == "Goal")
                 {
                     TiledMapObject thing = layer.Objects[0];
@@ -282,6 +305,18 @@ namespace PlatformerMonogame1
                         chest.chestSprite.position = new Vector2(thing.Position.X, thing.Position.Y);
                         chest.Load(Content, this);
                         goal = chest; 
+                    }
+                }
+
+                if (layer.Name == "Hazards")
+                {
+                    foreach (TiledMapObject thing in layer.Objects)
+                    {
+                        Hazards hazard = new Hazards();
+                        Vector2 tiles = new Vector2((int)(thing.Position.X / tileHeight), (int)(thing.Position.Y / tileHeight));
+                        hazard.hazardsSprite.position = tiles * tileHeight;
+                        hazard.Load(Content, this);
+                        hazards.Add(hazard);
                     }
                 }
             }
